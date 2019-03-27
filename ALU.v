@@ -50,15 +50,15 @@ localparam OR  = 4'b1000;
 			ALUResult= (A && B);
 			
 		  OR: // or
-			ALUResult= (A || B);
+			ALUResult= A | B;
 		  NOR: // nor
-			ALUResult= !(A || B);
+			ALUResult= ~(A | B);
 			
 			
 		  SLL: // 
-			ALUResult= A << Shamt;
+			ALUResult= B << Shamt;
 		  SRL: // 
-			ALUResult= A >> Shamt;
+			ALUResult= B >> Shamt;
 			
 		  LUI: // 
 			ALUResult={B[15:0],16'h00_00};

@@ -19,6 +19,7 @@ module DataMemory
 	input [DATA_WIDTH-1:0] WriteData,
 	input [DATA_WIDTH-1:0]  Address,
 	input MemWrite,MemRead, clk,
+	
 	output  [DATA_WIDTH-1:0]  ReadData
 );
 	

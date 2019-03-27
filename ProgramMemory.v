@@ -31,9 +31,10 @@ assign RealAddress = {2'b0,Address[(DATA_WIDTH-1):2]};
 
 	initial
 	begin
-		$readmemh("C:\Users\otis_\MIPSProcessor\text.dat", rom);
+		$readmemh("C:/Users/otis_/MIPSProcessor/text.dat", rom);
 	end
 
+	
 	always @ (RealAddress)
 	begin
 		Instruction = rom[RealAddress];

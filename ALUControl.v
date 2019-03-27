@@ -14,26 +14,35 @@
 ******************************************************************/
 module ALUControl
 (
-	input [2:0] ALUOp,
+	input [4:0] ALUOp,
 	input [5:0] ALUFunction,
 	output [3:0] ALUOperation
 
 );
 
-localparam R_Type_ADD    = 9'b111_100000;
-localparam R_Type_AND    = 9'b111_100100;
-localparam R_Type_NOR    = 9'b111_100111;
-localparam R_Type_OR     = 9'b111_100101;
-localparam R_Type_SLL    = 9'b111_000000;
-localparam R_Type_SRL    = 9'b111_000010;
+localparam R_Type_ADD    = 11'b00111_100000;
+localparam R_Type_AND    = 11'b00111_100100;
+localparam R_Type_NOR    = 11'b00111_100111;
+localparam R_Type_OR     = 11'b00111_100101;
+localparam R_Type_SLL    = 11'b00111_000000;
+localparam R_Type_SRL    = 11'b00111_000010;
 
-localparam I_Type_ADDI   = 9'b001_xxxxxx;
-localparam I_Type_ANDI	 = 9'b010_xxxxxx;
-localparam I_Type_ORI    = 9'b011_xxxxxx;
-localparam I_Type_LUI    = 9'b100_xxxxxx;
+localparam I_Type_ADDI   = 11'b00001_xxxxxx;
+localparam I_Type_ANDI	 = 11'b00010_xxxxxx;
+localparam I_Type_ORI    = 11'b00011_xxxxxx;
+localparam I_Type_LUI    = 11'b00100_xxxxxx;
+
+
+localparam I_Type_LW	    = 11'b00101_xxxxxx;
+localparam I_Type_SW	    = 11'b00110_xxxxxx;
+
+localparam I_Type_BEQ    = 11'b00111_xxxxxx;
+localparam I_Type_BNE    = 11'b01000_xxxxxx;
+
+
 
 reg [3:0] ALUControlValues;
-wire [8:0] Selector;
+wire [10:0] Selector;
 
 assign Selector = {ALUOp, ALUFunction};
 
@@ -51,6 +60,13 @@ always@(Selector)begin
 		I_Type_ANDI:	ALUControlValues = 4'b0101;
 		I_Type_ORI:		ALUControlValues = 4'b1000;
 		I_Type_LUI:		ALUControlValues = 4'b0010;
+		
+		
+		I_Type_LW:		ALUControlValues = 4'b0011;
+		I_Type_SW:		ALUControlValues = 4'b0011;
+		
+		I_Type_BEQ:		ALUControlValues = 4'b0100;
+		I_Type_BNE:		ALUControlValues = 4'b0100;
 
 		
 		default: ALUControlValues = 4'b1001;
