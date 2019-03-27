@@ -207,7 +207,7 @@ ArithmeticLogicUnit
 assign ALUResultOut = ALUResult_wire;
 
 
-////////////////////////7
+////////////////////////
 
 
 DataMemory 
@@ -227,6 +227,7 @@ RAMMememory
 
 
 
+
 Multiplexer2to1
 #(
 	.NBits(32)
@@ -240,6 +241,9 @@ MUX_ForALUResultAndRAMReadData
 	.MUX_Output(ALUResorRAMReadData_wire)
 
 );
+
+
+//////////////////////////
 
 
 endmodule
