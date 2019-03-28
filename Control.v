@@ -44,7 +44,7 @@ reg [12:0] ControlValues;
 
 always@(OP) begin
 	casex(OP)
-		R_Type:       	ControlValues= 13'b1_001_00_00_00111;
+		R_Type:       	ControlValues= 13'b1_001_00_00_00000;
 		
 		I_Type_ADDI:	ControlValues= 13'b0_101_00_00_00001;
 		I_Type_ANDI:	ControlValues= 13'b0_101_00_00_00010;

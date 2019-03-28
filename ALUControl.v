@@ -20,12 +20,12 @@ module ALUControl
 
 );
 
-localparam R_Type_ADD    = 11'b00111_100000;
-localparam R_Type_AND    = 11'b00111_100100;
-localparam R_Type_NOR    = 11'b00111_100111;
-localparam R_Type_OR     = 11'b00111_100101;
-localparam R_Type_SLL    = 11'b00111_000000;
-localparam R_Type_SRL    = 11'b00111_000010;
+localparam R_Type_ADD    = 11'b00000_100000;
+localparam R_Type_AND    = 11'b00000_100100;
+localparam R_Type_NOR    = 11'b00000_100111;
+localparam R_Type_OR     = 11'b00000_100101;
+localparam R_Type_SLL    = 11'b00000_000000;
+localparam R_Type_SRL    = 11'b00000_000010;
 
 localparam I_Type_ADDI   = 11'b00001_xxxxxx;
 localparam I_Type_ANDI	 = 11'b00010_xxxxxx;

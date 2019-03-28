@@ -54,11 +54,22 @@ wire [31:0] PC_4_wire;
 wire [31:0] InmmediateExtendAnded_wire;
 wire [31:0] PCtoBranch_wire;
 
-wire [31:0] MemRead_wire;
-wire [31:0] MemWrite_wire;
-wire [31:0] MemtoReg_wire;
+wire MemRead_wire;
+wire MemWrite_wire;
+wire MemtoReg_wire;
+
 wire [31:0] RAMReadData_wire;
-wire [31:0] ALUResorRAMReadData_wire;
+wire [31:0] ALUResOrRAMReadData_wire;
+
+
+wire BranchNENZero_wire;
+wire BranchEQNZero_wire;
+wire Branch_wire;
+
+wire [31:0] BranchAddress_wire;
+wire [31:0] BranchAddress_PC_4_wire;
+wire [31:0] PC4OrBranchAddress_wire;
+
 integer ALUStatus;
 
 
@@ -92,7 +103,7 @@ ProgramCOunter
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(PC_4_wire),
+	.NewPC(PC4OrBranchAddress_wire),
 	
 	.PCValue(PC_wire)
 );
@@ -100,7 +111,8 @@ ProgramCOunter
 
 ProgramMemory
 #(
-	.MEMORY_DEPTH(MEMORY_DEPTH)
+	//.MEMORY_DEPTH(MEMORY_DEPTH)
+	.MEMORY_DEPTH(64)
 )
 ROMProgramMemory
 (
@@ -110,13 +122,37 @@ ROMProgramMemory
 );
 
 Adder32bits
-PC_Puls_4
+PC_Plus_4
 (
 	.Data0(PC_wire),
 	.Data1(4),
 	
 	.Result(PC_4_wire)
 );
+
+Adder32bits
+PC_Plus_4_Plus_BranchAddress
+(
+	.Data0(PC_4_wire),
+	.Data1(BranchAddress_wire),
+	
+	.Result(BranchAddress_PC_4_wire)
+);
+
+Multiplexer2to1
+#(
+	.NBits(N)
+)
+MUX_ForPC4AndBranchAddress
+(
+	.Selector(Branch_wire),
+	.MUX_Data0(PC_4_wire),
+	.MUX_Data1(BranchAddress_PC_4_wire),
+	
+	.MUX_Output(PC4OrBranchAddress_wire)
+
+);
+//Terminar modulo para shift y addres
 
 
 //******************************************************************/
@@ -149,7 +185,7 @@ Register_File
 	.WriteRegister(WriteRegister_wire),
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
-	.WriteData(ALUResorRAMReadData_wire),
+	.WriteData(ALUResOrRAMReadData_wire),
 	
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
@@ -238,12 +274,54 @@ MUX_ForALUResultAndRAMReadData
 	.MUX_Data0(ALUResult_wire),
 	.MUX_Data1(RAMReadData_wire),
 	
-	.MUX_Output(ALUResorRAMReadData_wire)
+	.MUX_Output(ALUResOrRAMReadData_wire)
 
 );
 
 
 //////////////////////////
+
+
+ANDGate
+BranchEQAndZero
+(
+	.A(BranchEQ_wire),
+	.B(Zero_wire),
+	.C(BranchEQNZero_wire)
+);
+
+ANDGate
+BranchNEAndZero
+(
+	.A(BranchNE_wire),
+	.B(~Zero_wire),
+	.C(BranchNENZero_wire)
+);
+
+
+Multiplexer2to1
+#(
+	.NBits(1)
+)
+MUX_ForBranch
+(
+	.Selector(BranchNE_wire),
+	.MUX_Data0(BranchEQNZero_wire),
+	.MUX_Data1(BranchNENZero_wire),
+	
+	.MUX_Output(Branch_wire)
+
+);
+
+
+ShiftLeft2 
+BranchShift2
+(   
+	.DataInput(InmmediateExtend_wire),
+   
+	.DataOutput(BranchAddress_wire)
+
+);
 
 
 endmodule
