@@ -18,6 +18,8 @@ module Control
 	output RegDst,
 	output BranchEQ,
 	output BranchNE,
+	output Jump,
+	output JumpSrc,
 	output MemRead,
 	output MemtoReg,
 	output MemWrite,
@@ -39,24 +41,31 @@ localparam I_Type_SW	  = 6'h_2b;
 localparam I_Type_BEQ  = 6'h_4;
 localparam I_Type_BNE  = 6'h_5;
 
+localparam J_Type_J	  = 6'h_4;
+localparam J_Type_JAL  = 6'h_5;
 
-reg [12:0] ControlValues;
+
+reg [14:0] ControlValues;
 
 always@(OP) begin
 	casex(OP)
-		R_Type:       	ControlValues= 13'b1_001_00_00_00000;
+		R_Type:       	ControlValues= 15'b1_001_00_00_00_00000;
 		
-		I_Type_ADDI:	ControlValues= 13'b0_101_00_00_00001;
-		I_Type_ANDI:	ControlValues= 13'b0_101_00_00_00010;
-		I_Type_ORI:		ControlValues= 13'b0_101_00_00_00011;
-		I_Type_LUI:		ControlValues= 13'b0_101_00_00_00100;
+		I_Type_ADDI:	ControlValues= 15'b0_101_00_00_00_00001;
+		I_Type_ANDI:	ControlValues= 15'b0_101_00_00_00_00010;
+		I_Type_ORI:		ControlValues= 15'b0_101_00_00_00_00011;
+		I_Type_LUI:		ControlValues= 15'b0_101_00_00_00_00100;
 		
 		
-		I_Type_LW:		ControlValues= 13'b0_111_10_00_00101;
-		I_Type_SW:		ControlValues= 13'b0_110_01_00_00110;
+		I_Type_LW:		ControlValues= 15'b0_111_10_00_00_00101;
+		I_Type_SW:		ControlValues= 15'b0_110_01_00_00_00110;
 		
-		I_Type_BEQ:		ControlValues= 13'b0_000_00_01_00111;
-		I_Type_BNE:		ControlValues= 13'b0_000_00_10_01000;
+		I_Type_BEQ:		ControlValues= 15'b0_000_00_01_00_00111;
+		I_Type_BNE:		ControlValues= 15'b0_000_00_10_00_01000;
+		
+		//																 xxxxx
+		J_Type_J:		ControlValues= 15'b0_000_00_00_10_11111;
+		J_Type_JAL:		ControlValues= 15'b0_001_00_00_10_11111;
 
 		
 		default:
@@ -64,15 +73,17 @@ always@(OP) begin
 		endcase
 end	
 	
-assign RegDst = ControlValues[12];
-assign ALUSrc = ControlValues[11];
-assign MemtoReg = ControlValues[10];
-assign RegWrite = ControlValues[9];
-assign MemRead = ControlValues[8];
-assign MemWrite = ControlValues[7];
-assign BranchNE = ControlValues[6];
-assign BranchEQ = ControlValues[5];
-assign ALUOp = ControlValues[4:0];	
+assign RegDst	 = ControlValues[14];
+assign ALUSrc	 = ControlValues[13];
+assign MemtoReg = ControlValues[12];
+assign RegWrite = ControlValues[11];
+assign MemRead	 = ControlValues[10];
+assign MemWrite = ControlValues[9];
+assign BranchNE = ControlValues[8];
+assign BranchEQ = ControlValues[7];
+assign Jump		 = ControlValues[6];
+assign JumpSrc	 = ControlValues[5];
+assign ALUOp 	 = ControlValues[4:0];	
 
 endmodule
 //control

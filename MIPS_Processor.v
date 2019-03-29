@@ -70,6 +70,9 @@ wire [31:0] BranchAddress_wire;
 wire [31:0] BranchAddress_PC_4_wire;
 wire [31:0] PC4OrBranchAddress_wire;
 
+wire Jump_wire;
+wire JumpSrc_wire;
+
 integer ALUStatus;
 
 
@@ -86,6 +89,8 @@ ControlUnit
 	.RegDst(RegDst_wire),
 	.BranchNE(BranchNE_wire),
 	.BranchEQ(BranchEQ_wire),
+	.Jump(Jump_wire),
+	.JumpSrc(JumpSrc_wire),
 	.MemRead(MemRead_wire),
 	.MemtoReg(MemtoReg_wire),
 	.MemWrite(MemWrite_wire),
@@ -99,7 +104,7 @@ PC_Register
 #(
 	.N(N)
 )
-ProgramCOunter
+ProgramCounter
 (
 	.clk(clk),
 	.reset(reset),
@@ -152,7 +157,21 @@ MUX_ForPC4AndBranchAddress
 	.MUX_Output(PC4OrBranchAddress_wire)
 
 );
-//Terminar modulo para shift y addres
+
+
+Multiplexer2to1
+#(
+	.NBits(N)
+)
+MUX_ForPC4BranchOrJump
+(
+	.Selector(Branch_wire),
+	.MUX_Data0(PC_4_wire),
+	.MUX_Data1(BranchAddress_PC_4_wire),
+	
+	.MUX_Output(PC4OrBranchAddress_wire)
+
+);
 
 
 //******************************************************************/
@@ -322,6 +341,10 @@ BranchShift2
 	.DataOutput(BranchAddress_wire)
 
 );
+
+
+///////////////////////////
+
 
 
 endmodule

@@ -69,7 +69,7 @@ always@(Selector)begin
 		I_Type_BNE:		ALUControlValues = 4'b0100;
 
 		
-		default: ALUControlValues = 4'b1001;
+		default: ALUControlValues = 4'b1111;
 	endcase
 end
 
