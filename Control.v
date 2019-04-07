@@ -41,8 +41,8 @@ localparam I_Type_SW	  = 6'h_2b;
 localparam I_Type_BEQ  = 6'h_4;
 localparam I_Type_BNE  = 6'h_5;
 
-localparam J_Type_J	  = 6'h_4;
-localparam J_Type_JAL  = 6'h_5;
+localparam J_Type_J	  = 6'h_2;
+localparam J_Type_JAL  = 6'h_3;
 
 
 reg [14:0] ControlValues;
@@ -55,21 +55,21 @@ always@(OP) begin
 		I_Type_ANDI:	ControlValues= 15'b0_101_00_00_00_00010;
 		I_Type_ORI:		ControlValues= 15'b0_101_00_00_00_00011;
 		I_Type_LUI:		ControlValues= 15'b0_101_00_00_00_00100;
-		
-		
+			
+	
 		I_Type_LW:		ControlValues= 15'b0_111_10_00_00_00101;
 		I_Type_SW:		ControlValues= 15'b0_110_01_00_00_00110;
 		
 		I_Type_BEQ:		ControlValues= 15'b0_000_00_01_00_00111;
-		I_Type_BNE:		ControlValues= 15'b0_000_00_10_00_01000;
+		I_Type_BNE:		ControlValues= 15'b0_000_00_10_00_01001;
 		
-		//																 xxxxx
+		//														    	 xxxxx
 		J_Type_J:		ControlValues= 15'b0_000_00_00_10_11111;
 		J_Type_JAL:		ControlValues= 15'b0_001_00_00_10_11111;
 
 		
 		default:
-			ControlValues= 10'b0000000000;
+			ControlValues= 13'h0;
 		endcase
 end	
 	
@@ -81,8 +81,8 @@ assign MemRead	 = ControlValues[10];
 assign MemWrite = ControlValues[9];
 assign BranchNE = ControlValues[8];
 assign BranchEQ = ControlValues[7];
-assign Jump		 = ControlValues[6];
-assign JumpSrc	 = ControlValues[5];
+assign Jump 	 = ControlValues[6];
+assign JumpSrc  = ControlValues[5];
 assign ALUOp 	 = ControlValues[4:0];	
 
 endmodule

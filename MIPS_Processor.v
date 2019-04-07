@@ -72,12 +72,14 @@ wire [31:0] PC4OrBranchAddress_wire;
 
 wire Jump_wire;
 wire JumpSrc_wire;
+wire JumpR_wire;
+wire JumpRSrc_wire;
+wire JRegW_wire;
 
 wire [31:0] JumpAddress_wire;
 
 wire [31:0] NEW_PC_ADDRESS_wire;
-wire [31:0] PC_8_wire;
-wire [31:0] ALURAMOrPC_8_wire;
+wire [31:0] ALURAMOrPC_4_wire;
 
 wire [4:0] WriteRType_IType_wire;
 
@@ -129,7 +131,7 @@ ProgramCounter
 ProgramMemory
 #(
 	//.MEMORY_DEPTH(MEMORY_DEPTH)
-	.MEMORY_DEPTH(2048)
+	.MEMORY_DEPTH(1024)
 )
 ROMProgramMemory
 (
@@ -170,6 +172,7 @@ MUX_ForPC4AndBranchAddress
 
 );
 
+
 		// Is used for selecting the source for the Jump address
 		//	Could be a register or form the instrucction wire from the bit 25:0
 Multiplexer2to1
@@ -178,8 +181,8 @@ Multiplexer2to1
 )
 MUX_ForJumpAddresOrRegister
 (
-	.Selector(JumpSrc_wire),
-	.MUX_Data0(Instruction_wire[25:0]), //Jump Address
+	.Selector(JumpSrc_wire|JumpRSrc_wire),
+	.MUX_Data0({PC_4_wire[31:28],Instruction_wire[25:0],2'b0}-32'h0040_0000), //Jump Address
 	.MUX_Data1(ReadData1_wire), //R[rs]
 	
 	.MUX_Output(JumpAddress_wire)
@@ -193,7 +196,7 @@ Multiplexer2to1
 )
 MUX_ForPC4BranchOrJump
 (
-	.Selector(Jump_wire),
+	.Selector(Jump_wire|JumpR_wire),
 	.MUX_Data0(PC4OrBranchAddress_wire), //Mux for PC+4/Branch address
 	.MUX_Data1(JumpAddress_wire), //Mux for Jump Address from instruction R_TYPE/ R[rs]
 	
@@ -228,11 +231,11 @@ Register_File
 (
 	.clk(clk),
 	.reset(reset),
-	.RegWrite(RegWrite_wire),
+	.RegWrite(RegWrite_wire & JRegW_wire),
 	.WriteRegister(WriteRegister_wire),
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
-	.WriteData(ALURAMOrPC_8_wire),
+	.WriteData(ALURAMOrPC_4_wire),
 	
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
@@ -270,6 +273,9 @@ ArithmeticLogicUnitControl
 	.ALUOp(ALUOp_wire),
 	.ALUFunction(Instruction_wire[5:0]),
 	
+	.RegWOut(JRegW_wire),
+	.Jump(JumpR_wire),
+	.JumpSrc(JumpRSrc_wire),
 	.ALUOperation(ALUOperation_wire)
 );
 
@@ -300,7 +306,7 @@ DataMemory
 RAMMememory
 (
 	.WriteData(ReadData2_wire),
-	.Address(ALUResult_wire),
+	.Address(ALUResult_wire - 32'h1001_0000), 
 	.MemWrite(MemWrite_wire),
 	.MemRead(MemRead_wire),
 	.clk(clk),
@@ -374,29 +380,19 @@ BranchShift2
 ///////////////////////////
 
 
-	//We use this adder so we get pc+8 and we can send it to R[31] or $ra
-Adder32bits
-PC_Plus_4_Plus_4
-(
-	.Data0(PC_4_wire),
-	.Data1(4),
-	
-	.Result(PC_8_wire)
-);
-
-
+	//We use this so we get pc4 and we can send it to R[31] or $ra
 	//Select what is going to be written in the Register file
 Multiplexer2to1
 #(
 	.NBits(N)
 )
-MUX_ForALURAMAndPC8
+MUX_ForALURAMAndPC4
 (
 	.Selector(Jump_wire),
 	.MUX_Data0(ALUResOrRAMReadData_wire),
-	.MUX_Data1(PC_8_wire),
+	.MUX_Data1(PC_4_wire),
 	
-	.MUX_Output(ALURAMOrPC_8_wire)
+	.MUX_Output(ALURAMOrPC_4_wire)
 
 );
 
