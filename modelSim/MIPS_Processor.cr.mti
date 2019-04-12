@@ -78,12 +78,12 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 Top level modules:
 	ALU
 
-} {} {}} C:/Users/otis_/MIPSProcessor/ShiftLeft2.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/ShiftLeft2.v
+} {} {}} C:/Users/otis_/MIPSProcessor/ALUControl.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/ALUControl.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
--- Compiling module ShiftLeft2
+-- Compiling module ALUControl
 
 Top level modules:
-	ShiftLeft2
+	ALUControl
 
 } {} {}} C:/Users/otis_/MIPSProcessor/DataMemory.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/DataMemory.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
@@ -92,6 +92,13 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 Top level modules:
 	DataMemory
 
+} {} {}} C:/Users/otis_/MIPSProcessor/ShiftLeft2.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/ShiftLeft2.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module ShiftLeft2
+
+Top level modules:
+	ShiftLeft2
+
 } {} {}} C:/Users/otis_/MIPSProcessor/MIPS_Processor_TB.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/MIPS_Processor_TB.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module MIPS_Processor_TB
@@ -99,18 +106,18 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 Top level modules:
 	MIPS_Processor_TB
 
-} {} {}} C:/Users/otis_/MIPSProcessor/PC_Register.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/PC_Register.v
-Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
--- Compiling module PC_Register
-
-Top level modules:
-	PC_Register
-
 } {} {}} C:/Users/otis_/MIPSProcessor/Adder32bits.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/Adder32bits.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module Adder32bits
 
 Top level modules:
 	Adder32bits
+
+} {} {}} C:/Users/otis_/MIPSProcessor/PC_Register.v {1 {vlog -work work -stats=none C:/Users/otis_/MIPSProcessor/PC_Register.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module PC_Register
+
+Top level modules:
+	PC_Register
 
 } {} {}}

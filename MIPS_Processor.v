@@ -10,8 +10,7 @@
 
 module MIPS_Processor
 #(
-	parameter MEMORY_DEPTH = 32,
-	parameter N = 32
+	parameter MEMORY_DEPTH = 32
 )
 
 (
@@ -116,7 +115,7 @@ ControlUnit
 
 PC_Register
 #(
-	.N(N)
+	.N(32)
 )
 ProgramCounter
 (
@@ -160,7 +159,7 @@ PC_Plus_4_Plus_BranchAddress
 
 Multiplexer2to1
 #(
-	.NBits(N)
+	.NBits(32)
 )
 MUX_ForPC4AndBranchAddress
 (
@@ -177,7 +176,7 @@ MUX_ForPC4AndBranchAddress
 		//	Could be a register or form the instrucction wire from the bit 25:0
 Multiplexer2to1
 #(
-	.NBits(N)
+	.NBits(32)
 )
 MUX_ForJumpAddresOrRegister
 (
@@ -192,7 +191,7 @@ MUX_ForJumpAddresOrRegister
 		// We select either the mux for the jump address or the mux for the pc+4/branch adrress
 Multiplexer2to1
 #(
-	.NBits(N)
+	.NBits(32)
 )
 MUX_ForPC4BranchOrJump
 (
@@ -301,7 +300,7 @@ assign ALUResultOut = ALUResult_wire;
 
 DataMemory 
 #(	
-	.DATA_WIDTH(N)
+	.DATA_WIDTH(32)
 )
 RAMMememory
 (
@@ -384,7 +383,7 @@ BranchShift2
 	//Select what is going to be written in the Register file
 Multiplexer2to1
 #(
-	.NBits(N)
+	.NBits(32)
 )
 MUX_ForALURAMAndPC4
 (
