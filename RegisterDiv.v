@@ -3,13 +3,11 @@
 *	This the basic register that is used in the register file
 *	1.0
 * Author:
-*	Dr. José Luis Pizano Escalante
-* email:
-*	luispizano@iteso.mx
+*	Othon Alejandro Escandon Azpeitia
 * Date:
-*	01/03/2014
+*	20/04/2019
 ******************************************************************/
-module Register
+module RegisterDiv
 #(
 	parameter N=32
 )
@@ -22,7 +20,7 @@ module Register
 	output reg [N-1:0] DataOutput
 );
 
-always@(negedge reset or negedge clk) begin
+always@(negedge reset or posedge clk) begin
 	if(reset==0)
 		DataOutput <= 0;
 	else	
