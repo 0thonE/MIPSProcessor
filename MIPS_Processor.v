@@ -8,6 +8,7 @@
 ******************************************************************/
 
 
+
 module MIPS_Processor
 #(
 	parameter MEMORY_DEPTH = 32
@@ -38,7 +39,7 @@ wire ORForBranch;
 wire ALUSrc_wire;
 wire RegWrite_wire;
 wire Zero_wire;
-wire [2:0] ALUOp_wire;
+wire [4:0] ALUOp_wire;
 wire [3:0] ALUOperation_wire;
 wire [4:0] WriteRegister_wire;
 wire [31:0] MUX_PC_wire;
@@ -50,7 +51,7 @@ wire [31:0] InmmediateExtend_wire;
 wire [31:0] ReadData2OrInmmediate_wire;
 wire [31:0] ALUResult_wire;
 wire [31:0] PC_4_wire;
-wire [31:0] InmmediateExtendAnded_wire;
+//wire [31:0] InmmediateExtendAnded_wire;
 wire [31:0] PCtoBranch_wire;
 
 wire MemRead_wire;
@@ -85,12 +86,24 @@ wire [4:0] WriteRType_IType_wire;
 
 wire [63:0] fromIF_wire;
 wire [63:0] IFtoID_wire;
-wire [150:0] fromID_wire;
-wire [150:0] IDtoEX_wire;
-wire [107:0] fromEX_wire;
-wire [107:0] EXtoM_wire;
+wire [121:0] fromID_wire;
+wire [121:0] IDtoEX_wire;
+wire [72:0] fromEX_wire;
+wire [72:0] EXtoM_wire;
 wire [70:0] fromM_wire;
 wire [70:0] MtoWB_wire;
+
+wire [1:0] ForwardA_wire;
+wire [1:0] ForwardB_wire;
+
+wire [31:0] ALUA_wire;
+wire [31:0] ALUB_wire;
+
+wire EnablePC_Counter_wire;
+wire EnableIFtoID_wire;
+wire EnableControlSig_wire;
+
+wire [10:0] ControlSignal_wire;
 
 
 integer ALUStatus;
@@ -106,17 +119,17 @@ ControlUnit
 (
 	.OP(IFtoID_wire[31:26]),
 	
-	.RegDst(RegDst_wire),
+	.RegDst(RegDst_wire),//EX box
 	.BranchNE(BranchNE_wire),
 	.BranchEQ(BranchEQ_wire),
 //	.Jump(Jump_wire),
 //	.JumpSrc(JumpSrc_wire),
-	.MemRead(MemRead_wire),
-	.MemtoReg(MemtoReg_wire),
-	.MemWrite(MemWrite_wire),
-	.ALUOp(ALUOp_wire),
-	.ALUSrc(ALUSrc_wire),
-	.RegWrite(RegWrite_wire)
+	.MemRead(MemRead_wire),// MEM box
+	.MemtoReg(MemtoReg_wire),// WB box
+	.MemWrite(MemWrite_wire),//MEM box
+	.ALUOp(ALUOp_wire),// EX box
+	.ALUSrc(ALUSrc_wire),// EX box
+	.RegWrite(RegWrite_wire)//WB box
 );
 
 
@@ -128,8 +141,10 @@ ProgramCounter
 (
 	.clk(clk),
 	.reset(reset),
+	.enable(EnablePC_Counter_wire),
 //	.NewPC(NEW_PC_ADDRESS_wire),
-	.NewPC(PC4OrBranchAddress_wire),
+//	.NewPC(PC4OrBranchAddress_wire),
+	.NewPC(PC_4_wire),
 	
 	.PCValue(PC_wire)
 );
@@ -156,28 +171,29 @@ PC_Plus_4
 	.Result(PC_4_wire)
 );
 
-Adder32bits
-PC_Plus_4_Plus_BranchAddress
-(
-	.Data0(IDtoEX_wire[137:106]),
-	.Data1(BranchAddress_wire),
-	
-	.Result(BranchAddress_PC_4_wire)
-);
-
-Multiplexer2to1
-#(
-	.NBits(32)
-)
-MUX_ForPC4orBranchAddress
-(
-	.Selector(Branch_wire),
-	.MUX_Data0(PC_4_wire),
-	.MUX_Data1(EXtoM_wire[101:70]),
-	
-	.MUX_Output(PC4OrBranchAddress_wire)
-
-);
+//
+//Adder32bits
+//PC_Plus_4_Plus_BranchAddress
+//(
+//	.Data0(IDtoEX_wire[137:106]),
+//	.Data1(BranchAddress_wire),
+//	
+//	.Result(BranchAddress_PC_4_wire)
+//);
+//
+//Multiplexer2to1
+//#(
+//	.NBits(32)
+//)
+//MUX_ForPC4orBranchAddress
+//(
+//	.Selector(Branch_wire),
+//	.MUX_Data0(PC_4_wire),
+//	.MUX_Data1(EXtoM_wire[101:70]),
+//	
+//	.MUX_Output(PC4OrBranchAddress_wire)
+//
+//);
 
 
 		// Is used for selecting the source for the Jump address
@@ -223,7 +239,7 @@ Multiplexer2to1
 )
 MUX_ForRTypeAndIType
 (
-	.Selector(IDtoEX_wire[150]),
+	.Selector(IDtoEX_wire[117]),
 	.MUX_Data0(IDtoEX_wire[9:5]),
 	.MUX_Data1(IDtoEX_wire[4:0]),
 	
@@ -239,7 +255,7 @@ Register_File
 	.clk(clk),
 	.reset(reset),
 //	.RegWrite(RegWrite_wire & JRegW_wire),
-	.RegWrite(MtoWB_wire[69]),
+	.RegWrite(MtoWB_wire[70]),
 	.WriteRegister(MtoWB_wire[4:0]),
 	.ReadRegister1(IFtoID_wire[25:21]),
 	.ReadRegister2(IFtoID_wire[20:16]),
@@ -266,9 +282,9 @@ Multiplexer2to1
 )
 MUX_ForReadDataAndInmediate
 (
-	.Selector(IDtoEX_wire[143]),
-	.MUX_Data0(IDtoEX_wire[73:42]),
-	.MUX_Data1(IDtoEX_wire[41:10]),
+	.Selector(IDtoEX_wire[116]),		// AluSrc
+	.MUX_Data0(IDtoEX_wire[78:47]),  // ReadData2
+	.MUX_Data1(IDtoEX_wire[46:15]),  // Immidiate extended
 	
 	.MUX_Output(ReadData2OrInmmediate_wire)
 
@@ -278,8 +294,8 @@ MUX_ForReadDataAndInmediate
 ALUControl
 ArithmeticLogicUnitControl
 (
-	.ALUOp(IDtoEX_wire[142:138]),
-	.ALUFunction(IDtoEX_wire[15:10]),
+	.ALUOp(IDtoEX_wire[115:111]),
+	.ALUFunction(IDtoEX_wire[20:15]),
 	
 //	.RegWOut(JRegW_wire),
 //	.Jump(JumpR_wire),
@@ -292,10 +308,10 @@ ArithmeticLogicUnitControl
 ALU
 ArithmeticLogicUnit 
 (
-	.ALUOperation(ALUOperation_wire),
-	.A(IDtoEX_wire[105:74]),
-	.B(ReadData2OrInmmediate_wire),
-	.Shamt(IDtoEX_wire[20:16]),
+	.ALUOperation(ALUOperation_wire),	//
+	.A(ALUA_wire),								//ReadData1
+	.B(ReadData2OrInmmediate_wire),		//ReadData2 or Immidiate extended
+	.Shamt(IDtoEX_wire[25:21]),			//Shamt 
 	
 	.Zero(Zero_wire),
 	.ALUResult(ALUResult_wire)
@@ -313,10 +329,10 @@ DataMemory
 )
 RAMMememory
 (
-	.WriteData(EXtoM_wire[36:5]),
-	.Address(EXtoM_wire[68:37] - 32'h1001_0000), 
-	.MemWrite(EXtoM_wire[103]),
-	.MemRead(EXtoM_wire[105]),
+	.WriteData(EXtoM_wire[36:5]), //MemtoReg_wire
+	.Address(EXtoM_wire[68:37] - 32'h1001_0000), // ALUResult
+	.MemWrite(EXtoM_wire[70]),
+	.MemRead(EXtoM_wire[69]),
 	.clk(clk),
 	
 	.ReadData(RAMReadData_wire)
@@ -331,9 +347,9 @@ Multiplexer2to1
 )
 MUX_ForALUResultAndRAMReadData
 (
-	.Selector(MtoWB_wire[70]),
-	.MUX_Data0(MtoWB_wire[68:37]),
-	.MUX_Data1(MtoWB_wire[36:5]),
+	.Selector(MtoWB_wire[69]),
+	.MUX_Data0(MtoWB_wire[36:5]),
+	.MUX_Data1(MtoWB_wire[68:37]),
 	
 	.MUX_Output(ALUResOrRAMReadData_wire)
 
@@ -341,38 +357,38 @@ MUX_ForALUResultAndRAMReadData
 
 
 //////////////////////////
-
-
-ANDGate
-BranchEQAndZero
-(
-	.A(EXtoM_wire[106]),
-	.B(EXtoM_wire[69]),
-	.C(BranchEQNZero_wire)
-);
-
-ANDGate
-BranchNEAndZero
-(
-	.A(EXtoM_wire[107]),
-	.B(~EXtoM_wire[69]),
-	.C(BranchNENZero_wire)
-);
+//
+//
+//ANDGate
+//BranchEQAndZero
+//(
+//	.A(EXtoM_wire[106]),
+//	.B(EXtoM_wire[69]),
+//	.C(BranchEQNZero_wire)
+//);
+//
+//ANDGate
+//BranchNEAndZero
+//(
+//	.A(EXtoM_wire[107]),
+//	.B(~EXtoM_wire[69]),
+//	.C(BranchNENZero_wire)
+//);
 
 	//Get the mux for PC4/Branch address selector
-Multiplexer2to1
-#(
-	.NBits(1)
-)
-MUX_ForBranch
-(
-	.Selector(EXtoM_wire[107]),
-	.MUX_Data0(BranchEQNZero_wire),
-	.MUX_Data1(BranchNENZero_wire),
-	
-	.MUX_Output(Branch_wire)
-
-);
+//Multiplexer2to1
+//#(
+//	.NBits(1)
+//)
+//MUX_ForBranch
+//(
+//	.Selector(EXtoM_wire[107]),
+//	.MUX_Data0(BranchEQNZero_wire),
+//	.MUX_Data1(BranchNENZero_wire),
+//	
+//	.MUX_Output(Branch_wire)
+//
+//);
 
 	//We shift the inmmediate <<2 to be sure that the memomry address is valid
 ShiftLeft2 
@@ -435,24 +451,32 @@ IFtoID_Register
 (
 	.clk(clk),
 	.reset(reset),
-	.enable(1),
+	.enable(EnableIFtoID_wire),
 	.DataInput(fromIF_wire),
 	
 	.DataOutput(IFtoID_wire)
 );
 
 
-							 	//152			151						150 			149				148			147	
-assign fromID_wire = { /*Jump_wire, JumpSrc_wire,*/ RegDst_wire, BranchNE_wire,BranchEQ_wire,MemRead_wire,
-								//146					145			144				143			142:138
-							 MemtoReg_wire, MemWrite_wire, RegWrite_wire, ALUSrc_wire, ALUOp_wire,
-								//137:106					105:74			73:42					41:10							9:0
-							 IFtoID_wire[63:32], ReadData1_wire, ReadData2_wire, InmmediateExtend_wire, IFtoID_wire [20:11]};
-								//PC+4																						 ==Instruction Wire
+
+							//	 		121								120
+assign fromID_wire = {	 ControlSignal_wire[10], ControlSignal_wire[9],
+							//  RegWrite_wire               MemtoReg_wire //WB control portion
+							//			119		              	   118
+								 ControlSignal_wire[8], ControlSignal_wire[7],
+							//	 MemWrite_wire					 MemRead_wire  //MEM control portion
+							//			117								116					115:111
+								 ControlSignal_wire[6], ControlSignal_wire[5], ControlSignal_wire[4:0],
+							//	 RegDst_wire   					ALUSrc_wire 		   ALUOp_wire, 		//EX control portion
+							//		110:79			78:47					46:15							14:0
+                         ReadData1_wire, ReadData2_wire, InmmediateExtend_wire, IFtoID_wire [25:11] };
+                     //   																			==Instruction Wire
+							
+							
 							 
 RegisterDiv
 #(
-	.N(151)
+	.N(122)
 )
 IDtoEX_Register
 (
@@ -465,15 +489,21 @@ IDtoEX_Register
 );
 
 
-								 //107:102									107			106				105			104					103			102
-assign fromEX_wire = {IDtoEX_wire[149:144], // order: BranchNE_wire,BranchEQ_wire,MemRead_wire,MemtoReg_wire, MemWrite_wire, RegWrite_wire 
-								 //101:70					69				68:37			 		36:5						4:0
-							 BranchAddress_PC_4_wire, Zero_wire, ALUResult_wire, IDtoEX_wire[73:42], WriteRType_IType_wire};
-																										//ReadData2
+							// 		72					71	
+assign fromEX_wire = {	IDtoEX_wire[121], IDtoEX_wire[120],
+							//	  RegWrite_wire    MemtoReg_wire
+                     //   		70					69
+								IDtoEX_wire[119], IDtoEX_wire[118],
+                     //   MemWrite_wire    MemRead_wire
+							//			68:37			 36:5						4:0
+								 ALUResult_wire, ALUB_wire, WriteRType_IType_wire };
+							//						  ReadData2
+							 
+							 
 
 RegisterDiv
 #(			
-	.N(108)
+	.N(73)
 )
 EXtoMEM_Register
 (
@@ -487,8 +517,13 @@ EXtoMEM_Register
 
 
 									
-							//70 MemtoReg		69 RegWrite			68:37 ALUResult		36:5				4:0 R/I Type
-assign fromM_wire = {EXtoM_wire[104], EXtoM_wire[102], EXtoM_wire[68:37], RAMReadData_wire, EXtoM_wire[4:0]};
+						  //		70					  69	
+assign fromM_wire = {  EXtoM_wire[72], EXtoM_wire[71],
+						  //  RegWrite_wire   MemtoReg_wire
+						  //		68:37					36:5						4:0
+							  RAMReadData_wire, EXtoM_wire[68:37], EXtoM_wire[4:0] };
+						  //								ALUResult			R/I Type
+
 
 RegisterDiv
 #(
@@ -504,6 +539,99 @@ MEMtoWB_Register
 	.DataOutput(MtoWB_wire)
 );
 
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+Forwarding_Unit
+ForwardingUnit
+(
+	.clk(clk),
+	
+	.in_ExM_RegWrite(EXtoM_wire[72]),
+	.in_MW_RegWrite(MtoWB_wire[70]),
+	
+	.in_ExM_RegisterRd(EXtoM_wire[4:0]),
+	.in_MW_RegisterRd(MtoWB_wire[4:0]),
+	
+	.in_IdEx_RegisterRs(IDtoEX_wire[14:10]),
+	.in_IdEx_RegisterRt(IDtoEX_wire[9:5]),
+	
+	
+	.ForwardA(ForwardA_wire),
+	.ForwardB(ForwardB_wire)
+);
+
+Multiplexer4to1
+Mux_FU_ALU_DataA
+(
+	.Selector(ForwardA_wire),
+	.MUX_Data0(IDtoEX_wire[110:79]),
+	.MUX_Data1(ALUResOrRAMReadData_wire),
+	.MUX_Data2(EXtoM_wire[68:37]),
+//	.MUX_Data3(), //No se usa
+	
+	.MUX_Output(ALUA_wire)
+
+);
+
+Multiplexer4to1
+Mux_FU_ALU_DataB
+(
+	.Selector(ForwardB_wire),
+	.MUX_Data0(IDtoEX_wire[78:47]),
+	.MUX_Data1(ALUResOrRAMReadData_wire),
+	.MUX_Data2(EXtoM_wire[68:37]),
+//	.MUX_Data3(), //No se usa
+	
+	.MUX_Output(ALUB_wire)
+
+);
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+HazardDetection_Unit
+HazarDetection
+(
+	.clk(clk),
+	
+	.in_IdEx_MemRead(IDtoEX_wire[118]),
+	
+	.in_IdEx_RegisterRt(IDtoEX_wire[9:5]),
+	
+	.in_IfId_RegisterRs(IFtoID_wire[14:10]),
+	.in_IfId_RegisterRt(IFtoID_wire[9:5]),
+	
+	
+	.EnablePC_Counter(EnablePC_Counter_wire),
+	.EnableIFtoID(EnableIFtoID_wire),
+	.EnableControSig(EnableControlSig_wire)
+
+);
+
+Multiplexer2to1
+#(
+	.NBits(11)
+)
+MUX_ControlSignal
+(
+	.Selector(EnableControlSig_wire),
+	.MUX_Data0(0),
+	.MUX_Data1({RegWrite_wire, MemtoReg_wire, MemWrite_wire, MemRead_wire,	RegDst_wire, ALUSrc_wire, ALUOp_wire }),
+	
+	.MUX_Output(ControlSignal_wire)
+
+);
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
 endmodule
-
-

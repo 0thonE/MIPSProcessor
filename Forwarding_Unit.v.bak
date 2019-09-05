@@ -1,0 +1,18 @@
+module Forwarding_Unit
+(
+	input clk,
+	
+	input in_ExM_RegWrite,
+	input [5:0]in_ExM_RegisterRd,
+	input [5:0]in_ExM_RegisterRs,
+	input [5:0]in_ExM_RegisterRt,
+	
+	input in_MW_RegWrite,
+	input [5:0]in_MW_RegisterRd,
+	input [5:0]in_MW_RegisterRs,
+	input [5:0]in_MW_RegisterRt,
+	
+	
+	output [1:0]ForwardA,
+	output [1:0]ForwardB
+);

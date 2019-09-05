@@ -1,0 +1,40 @@
+module HazardDetection_Unit
+(
+	input clk,
+	
+	input in_IdEx_MemRead,
+	
+	input [4:0]in_IdEx_RegisterRt,
+
+	
+	input [4:0]in_IfId_RegisterRs,
+	input [4:0]in_IfId_RegisterRt,
+	
+	
+	output EnablePC_Counter,
+	output EnableIFtoID,
+	output EnableControSig,
+
+);
+
+
+always@(clk)begin
+	
+		if(in_IdEx_MemRead & ((in_IdEx_RegisterRt == in_IfId_RegisterRs) | (in_IdEx_RegisterRt == in_IfId_RegisterRt)))
+			begin
+				PC_Counter_En 	= 1'b0;
+				IFtoID_EN 		= 1'b0;
+				Control_En 		= 1'b0;
+			end
+		else
+			begin
+				EnablePC_Counter	= 1'b1;
+				EnableIFtoID 		= 1'b1;
+				EnableControlSig	= 1'b1;
+			end
+			
+		
+end
+
+
+endmodule
